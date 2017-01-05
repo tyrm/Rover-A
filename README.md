@@ -1,6 +1,18 @@
 # Rover-A
 First Rover Prototype.
 
+## Hardware
+* Raspbery Pi Model A+
+* (8-Channel PWM or Servo FeatherWing )[https://www.adafruit.com/product/2928]
+  * 12-bit resolution for each output
+* (Adafruit VL53L0X Time of Flight Distance Sensor)[https://www.adafruit.com/products/3317]
+  * ~30 to 1000mm range
+* (DC Motor + Stepper FeatherWing)[https://www.adafruit.com/product/2927]
+  * 4 full H-Bridges
+* (Rover 5 Chssis)[https://www.sparkfun.com/products/10336]
+  * 4 independent DC motors
+  * 4 independent hall-effect encoders
+
 ## i²c Addresses
 | Address | Purpose | Device |
 | --- | --- | --- |
