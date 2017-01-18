@@ -26,9 +26,6 @@ class TrackController:
 
         self.odometer = [0, 0, 0, 0]
         self.odometer_lock = Lock()
-        self.odometer_thread = Thread(name='Odometer',
-                                      target=self.update_odometer)
-        self.odometer_thread.start()
 
     # Motors
     # motors numbered from port forward clockwise
@@ -150,6 +147,12 @@ class TrackController:
                             self.dec_odometer(index)
 
                 last_value = val
+
+    def start_odometer(self):
+        self.init_encoders()
+        self.odometer_thread = Thread(name='Odometer',
+                                      target=self.update_odometer)
+        self.odometer_thread.start()
 
     def int2bin(self, n):
         """From positive integer to list of binary bits, msb at index 0
