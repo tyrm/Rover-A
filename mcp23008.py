@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 from Adafruit_GPIO import I2C
 
 # Register Addresses
