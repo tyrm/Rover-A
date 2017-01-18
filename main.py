@@ -5,6 +5,9 @@ import time
 
 from trackcontroller import TrackController
 
+#Configuration
+MY_NAME = 0x0061
+
 GPIO_PIN_WHEEL_ENCODER_INT = 4
 
 I2C_ADDR_FORWARD_DISTANCE = 0x29
