@@ -9,6 +9,9 @@ First Rover Prototype.
   * ~30 to 1000mm range
 * [DC Motor + Stepper FeatherWing](https://www.adafruit.com/product/2927)
   * 4 full H-Bridges
+* [MCP23008 - i2c 8 input/output port](https://www.adafruit.com/products/593)
+  * 8 general purpose pins
+  * interrupt via an external pin
 * [Rover 5 Chssis](https://www.sparkfun.com/products/10336)
   * 4 independent DC motors
   * 4 independent hall-effect encoders
