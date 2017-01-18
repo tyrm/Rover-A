@@ -1,6 +1,10 @@
 # Rover-A
 First Rover Prototype.
 
+## Required Libraries
+* [Adafruit_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
+* [Adafruit_MotorHAT](https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library)
+
 ## Hardware
 * Raspbery Pi Model A+
 * [8-Channel PWM or Servo FeatherWing](https://www.adafruit.com/product/2928)
