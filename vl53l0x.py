@@ -99,7 +99,7 @@ class VL53L0X:
         rev_id = self.get_revision_id()
         dev_id = self.get_model_id()
 
-        logging.debug("VL53L0X RevisionID[{0}] DeviceID[{1}]".format(hex(rev_id), hex(dev_id)))
+        logging.info("VL53L0X RevisionID[{0}] DeviceID[{1}]".format(hex(rev_id), hex(dev_id)))
 
     def measure_distance(self):
         self.set_sysrange_start(0x01)
