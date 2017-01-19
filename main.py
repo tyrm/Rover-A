@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+import Adafruit_PCA9685
 import logging
 import time
 
+from scanner import Scanner
 from trackcontroller import TrackController
 
-#Configuration
+# Configuration
 MY_NAME = 0x0061
 
 GPIO_PIN_WHEEL_ENCODER_INT = 4
@@ -15,29 +17,43 @@ I2C_ADDR_PWM_CONTROLLER = 0x4F
 I2C_ADDR_WHEEL_CONTROLLER = 0x6F
 I2C_ADDR_WHEEL_ENCODERS = 0x27
 
+PWM_FORWARD_SCANNER = 3
+
+# Initialization
 logging.basicConfig(level=logging.DEBUG,
                     format='%(levelname)8s (%(threadName)-10s) %(message)s',
                     )
 
 logging.info("starting")
 
+pwm = Adafruit_PCA9685.PCA9685(I2C_ADDR_PWM_CONTROLLER)
+pwm.set_pwm_freq(60)
+
 wheels = TrackController(GPIO_PIN_WHEEL_ENCODER_INT, mot_addr=I2C_ADDR_WHEEL_CONTROLLER,
                          enc_addr=I2C_ADDR_WHEEL_ENCODERS)
 
-wheels.set_motor_speed(0)
-wheels.set_track_direction(1,1)
-wheels.set_track_direction(-1,2)
+scanner = Scanner(pwm, sensor_addr=I2C_ADDR_FORWARD_DISTANCE, pwm_servo_index=PWM_FORWARD_SCANNER)
 
-for i in range(255):
-    wheels.set_motor_speed(i)
-    time.sleep(0.01)
 
-for i in reversed(range(255)):
-    wheels.set_motor_speed(i)
-    time.sleep(0.01)
+def main():
+    wheels.set_motor_speed(0)
+    wheels.set_track_direction(1, 1)
+    wheels.set_track_direction(-1, 2)
 
-wheels.set_motor_direction(0)
+    for i in range(255):
+        wheels.set_motor_speed(i)
+        time.sleep(0.01)
 
-time.sleep(5)
+    for i in reversed(range(255)):
+        wheels.set_motor_speed(i)
+        time.sleep(0.01)
 
-exit()
+    wheels.set_motor_direction(0)
+
+    time.sleep(5)
+
+    exit()
+
+
+if __name__ == "__main__":
+    main()

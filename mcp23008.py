@@ -23,61 +23,70 @@ class MCP23008:
         self.device = i2c.get_i2c_device(address)
 
     def set_io_direction(self, val):
-        self.device.writeList(MCP23008_REG_IODIR, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_IODIR, val)
 
     def get_io_direction(self):
-        return self.device.readList(MCP23008_REG_IODIR, 1)
+        return self.device.readU8(MCP23008_REG_IODIR)
 
     def set_input_polarity(self, val):
-        self.device.writeList(MCP23008_REG_IPOL, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_IPOL, val)
 
     def get_input_polarity(self):
-        return self.device.readList(MCP23008_REG_IPOL, 1)
+        return self.device.readU8(MCP23008_REG_IPOL)
 
     def set_interupt_on_change_pins(self, val):
-        self.device.writeList(MCP23008_REG_GPINTEN, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_GPINTEN, val)
 
     def get_interupt_on_change_pins(self):
-        return self.device.readList(MCP23008_REG_GPINTEN, 1)
+        return self.device.readU8(MCP23008_REG_GPINTEN)
 
     def set_default_value(self, val):
-        self.device.writeList(MCP23008_REG_DEFVAL, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_DEFVAL, val)
 
     def get_default_value(self):
-        return self.device.readList(MCP23008_REG_DEFVAL, 1)
+        return self.device.readU8(MCP23008_REG_DEFVAL)
 
     def set_interupt_control(self, val):
-        self.device.writeList(MCP23008_REG_INTCON, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_INTCON, val)
 
     def get_interupt_control(self):
-        return self.device.readList(MCP23008_REG_INTCON, 1)
+        return self.device.readU8(MCP23008_REG_INTCON)
 
     def set_configuration(self, val):
-        self.device.writeList(MCP23008_REG_IOCON, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_IOCON, val)
 
     def get_configuration(self):
-        return self.device.readList(MCP23008_REG_IOCON, 1)
+        return self.device.readU8(MCP23008_REG_IOCON)
 
     def set_pull_up_resistor(self, val):
-        self.device.writeList(MCP23008_REG_GPPU, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_GPPU, val)
 
     def get_pull_up_resistor(self):
-        return self.device.readList(MCP23008_REG_GPPU, 1)
+        return self.device.readU8(MCP23008_REG_GPPU)
 
     def get_interupt_flag(self):
-        return self.device.readList(MCP23008_REG_INTF, 1)
+        return self.device.readU8(MCP23008_REG_INTF)
 
     def get_interupt_capture(self):
-        return self.device.readList(MCP23008_REG_INTCAP, 1)
+        return self.device.readU8(MCP23008_REG_INTCAP)
 
     def set_gpio(self, val):
-        self.device.writeList(MCP23008_REG_GPIO, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_GPIO, val)
 
     def get_gpio(self):
-        return self.device.readList(MCP23008_REG_GPIO, 1)
+        return self.device.readU8(MCP23008_REG_GPIO)
 
     def set_output_latch(self, val):
-        self.device.writeList(MCP23008_REG_OLAT, val)
+        val = val & 0xFF
+        self.device.write8(MCP23008_REG_OLAT, val)
 
     def get_output_latch(self):
-        return self.device.readList(MCP23008_REG_OLAT, 1)
+        return self.device.readU8(MCP23008_REG_OLAT)

@@ -95,19 +95,19 @@ class TrackController:
 
     # Encoders
     def init_encoders(self):
-        self.encoders.set_io_direction([0xff])  # all pins to input
-        self.encoders.set_interupt_on_change_pins([0xff])  # enable interrupt on all pins
-        self.encoders.set_interupt_control([0x00])  # interrupt on rise and fall
-        self.encoders.set_configuration([0x00])  # active-low
+        self.encoders.set_io_direction(0xff)  # all pins to input
+        self.encoders.set_interupt_on_change_pins(0xff)  # enable interrupt on all pins
+        self.encoders.set_interupt_control(0x00)  # interrupt on rise and fall
+        self.encoders.set_configuration(0x00)  # active-low
 
     def get_encoders(self):
         val = self.encoders.get_gpio()
 
         enc_vals = []
-        enc_vals.append(self.int2bin((val[0] & 0xC0) >> 6))
-        enc_vals.append(self.int2bin(val[0] & 0x03))
-        enc_vals.append(self.int2bin((val[0] & 0x0C) >> 2))
-        enc_vals.append(self.int2bin((val[0] & 0x30) >> 4))
+        enc_vals.append(self.int2bin((val & 0xC0) >> 6))
+        enc_vals.append(self.int2bin(val & 0x03))
+        enc_vals.append(self.int2bin((val & 0x0C) >> 2))
+        enc_vals.append(self.int2bin((val & 0x30) >> 4))
 
         return enc_vals
 
