@@ -40,19 +40,9 @@ scanner = Scanner(pwm, sensor_addr=I2C_ADDR_FORWARD_DISTANCE, pwm_servo_index=PW
 
 
 def main():
-    wheels.set_motor_speed(0)
-    wheels.set_track_direction(1, 1)
-    wheels.set_track_direction(-1, 2)
+    val = scanner.do_scan()
 
-    for i in range(255):
-        wheels.set_motor_speed(i)
-        time.sleep(0.01)
-
-    for i in reversed(range(255)):
-        wheels.set_motor_speed(i)
-        time.sleep(0.01)
-
-    wheels.set_motor_direction(0)
+    print(val)
 
     time.sleep(5)
 
