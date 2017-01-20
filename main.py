@@ -17,6 +17,9 @@ I2C_ADDR_PWM_CONTROLLER = 0x4F
 I2C_ADDR_WHEEL_CONTROLLER = 0x6F
 I2C_ADDR_WHEEL_ENCODERS = 0x27
 
+PULSE_FORWARD_SCANNER_MIN = 150
+PULSE_FORWARD_SCANNER_MAX = 599
+
 PWM_FORWARD_SCANNER = 3
 
 # Initialization
@@ -32,7 +35,8 @@ pwm.set_pwm_freq(60)
 wheels = TrackController(GPIO_PIN_WHEEL_ENCODER_INT, mot_addr=I2C_ADDR_WHEEL_CONTROLLER,
                          enc_addr=I2C_ADDR_WHEEL_ENCODERS)
 
-scanner = Scanner(pwm, sensor_addr=I2C_ADDR_FORWARD_DISTANCE, pwm_servo_index=PWM_FORWARD_SCANNER)
+scanner = Scanner(pwm, sensor_addr=I2C_ADDR_FORWARD_DISTANCE, pwm_servo_index=PWM_FORWARD_SCANNER,
+                  servo_pulse_min=PULSE_FORWARD_SCANNER_MIN, servo_pulse_max=PULSE_FORWARD_SCANNER_MAX)
 
 
 def main():
