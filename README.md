@@ -4,6 +4,7 @@ First Rover Prototype.
 ## Required Libraries
 * [Adafruit_GPIO](https://github.com/adafruit/Adafruit_Python_GPIO)
 * [Adafruit_MotorHAT](https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library)
+* [Adafruit_PCA9685](https://github.com/adafruit/Adafruit_Python_PCA9685)
 
 ## Hardware
 * Raspbery Pi Model A+
