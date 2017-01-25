@@ -1,4 +1,4 @@
-# Rover-A
+# Rover-A [![Build Status](https://travis-ci.org/tyrm/Rover-A.svg?branch=master)](https://travis-ci.org/tyrm/Rover-A)
 First Rover Prototype.
 
 ## Required Libraries
