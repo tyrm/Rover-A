@@ -1,0 +1,6 @@
+Adafruit-GPIO
+Adafruit_MotorHAT
+Adafruit-PCA9685
+numpy
+sqlalchemy
+

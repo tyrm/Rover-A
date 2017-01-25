@@ -105,6 +105,14 @@ VL53L0X_CHECKENABLE_SIGNAL_RATE_PRE_RANGE = 5
 VL53L0X_VCSEL_PERIOD_PRE_RANGE = 0
 VL53L0X_VCSEL_PERIOD_FINAL_RANGE = 1
 
+VL53L0X_DEVICEMODE_SINGLE_RANGING = 0
+VL53L0X_DEVICEMODE_CONTINUOUS_RANGING = 1
+VL53L0X_DEVICEMODE_SINGLE_HISTOGRAM = 2
+VL53L0X_DEVICEMODE_CONTINUOUS_TIMED_RANGING = 3
+VL53L0X_DEVICEMODE_SINGLE_ALS = 10
+VL53L0X_DEVICEMODE_GPIO_DRIVE = 20
+VL53L0X_DEVICEMODE_GPIO_OSC = 21
+
 logging.getLogger(__name__)
 
 
@@ -120,6 +128,7 @@ class VL53L0X:
         dev_id = self.get_model_id()
 
         # Internal Parameters
+        self.device_mode = VL53L0X_DEVICEMODE_SINGLE_RANGING
         self.limit_checks_value = [0, 0, 0, 0, 0, 0]
 
         logging.info("VL53L0X RevisionID[{0}] DeviceID[{1}]".format(hex(rev_id), hex(dev_id)))
@@ -343,6 +352,7 @@ class VL53L0X:
             self.device.write16(VL53L0X_REG_FINAL_RANGE_CONFIG_TIMEOUT_MACROP_HI, final_range_encoded_time_out)
         else:
             raise ValueError("get_sequence_step_timeout received invalid step_id")
+
 
     # custom
     def get_model_id(self):
