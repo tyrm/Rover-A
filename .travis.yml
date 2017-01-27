@@ -9,4 +9,4 @@ script: python -m unittest discover -v -s test
 notifications:
   webhooks:
     urls:
-      - pup.haus/travisci/notifications
+      - http://pup.haus/travisci/notifications
