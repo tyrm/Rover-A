@@ -60,5 +60,9 @@ class MapCell(Base):
     scan_id = Column(Integer, ForeignKey('scans.id'))
     scan = relationship("Scan", back_populates="map_cells")
 
+    def __repr__(self):
+        return "<MapCell(id='%s', x='%s', y='%s', hit='%s', scan=%s)>" % (
+            self.id, self.x, self.y, self.hit, self.scan)
+
 
 

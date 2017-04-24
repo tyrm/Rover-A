@@ -8,6 +8,8 @@ import threading
 import time
 
 import Adafruit_PCA9685
+import atexit
+from flask import Flask
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -36,7 +38,7 @@ FORWARD_SCANNER_PULSE_MAX = 599
 
 # Initialization
 # logging.basicConfig(level=logging.INFO, format='%(levelname)8s (%(threadName)-10s) %(message)s')
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)8s (%(threadName)-10s) %(name)s:%(message)s')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)8s (%(threadName)-10s) %(name)s: %(message)s')
 log = logging.getLogger(__name__)
 
 
@@ -81,26 +83,26 @@ class RoverA:
             self.map = default_map
         else:
             log.info('Creating new map [{0}]'.format(default_map_name))
-            new_map = Map(name=default_map_name, scale=10)
+            new_map = Map(name=default_map_name, scale=50)
             self.db_session.add(new_map)
             self.db_session.commit()
             self.map = new_map
 
         log.info('Using map {0}'.format(self.map))
 
-        #Start API
+        # Start API
         self.api_thread = threading.Thread(target=self.run_api)
-
+        self.api_thread.start()
 
     def run(self):
-        val = self.do_scan()
+        # val = self.do_scan()
 
-        self.db_session.add(val)
-        self.db_session.commit()
+        # self.db_session.add(val)
+        # self.db_session.commit()
 
-        self.update_map(val)
+        # self.update_map(val)
 
-        time.sleep(5)
+        self.api_map()
 
         exit()
 
@@ -150,11 +152,64 @@ class RoverA:
         log.info("Committing Hits")
         self.db_session.commit()
         log.info("Updating Misses")
-        for miss in misses:
+        for index, miss in enumerate(misses):
             miss_cell = MapCell(map=self.map, x=miss[0], y=miss[1], hit=False, scan=scan)
             self.db_session.add(miss_cell)
+            if index % 200 == 0 and index != 0:
+                log.info("Committing Misses Offset {0}".format(index))
+                self.db_session.commit()
 
-        log.info("Committing Misses")
+        log.info("Committing Final Misses")
         self.db_session.commit()
         log.info("Map update complete")
+
+    def run_api(self):
+        app = Flask(__name__)
+
+        @app.route("/map")
+        def hello():
+            return "Hello World!"
+
+        app.run(host='0.0.0.0')
+
+    def api_map(self):
+
+        max_x = self.db_session.query(MapCell).order_by(MapCell.x.desc()).limit(1).first().x
+        min_x = self.db_session.query(MapCell).order_by(MapCell.x.asc()).limit(1).first().x
+        max_y = self.db_session.query(MapCell).order_by(MapCell.y.desc()).limit(1).first().y
+        min_y = self.db_session.query(MapCell).order_by(MapCell.y.asc()).limit(1).first().y
+
+        w = max_x - min_x
+        h = max_y - min_y
+
+        log.info('Map size ({4}, {5}) [{0}, {1}] x [{2}, {3}]'.format(min_x, min_y, max_x, max_y, w, h))
+
+        map = [[None for _ in range(h+1)] for _ in range(w+1)]
+
+        for y in range(min_y, max_y+1):
+            for x in range(min_x, max_x+1):
+                cells = self.db_session.query(MapCell).filter_by(x=x, y=y).order_by(MapCell.id.desc()).limit(10).all()
+
+                if len(cells) > 0:
+                    hit_ints = []
+
+                    for cell in cells:
+                        if cell.hit:
+                            hit_ints.append(1.0)
+                        else:
+                            hit_ints.append(0.0)
+
+                    map[x-min_x][y-min_y] = numpy.average(hit_ints)
+
+        for y in range(h+1):
+            line = ''
+            for x in range(w+1):
+                cell = map[x][h-y]
+                if cell is None:
+                    line += ' '
+                elif cell == 1:
+                    line += '*'
+                else:
+                    line += str(int(cell*10))
+            print(line)
 
