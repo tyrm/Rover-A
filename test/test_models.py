@@ -17,7 +17,7 @@ class TestScanModel(unittest.TestCase):
 
         Base.metadata.create_all(engine)
 
-        test_scan = Scan(x=12, y=67, rotation=187)
+        test_scan = Scan(x=12, y=67, rotation=187, quality=10)
         self.session.add(test_scan)
 
     def test_scan_model_return_value(self):
@@ -25,6 +25,7 @@ class TestScanModel(unittest.TestCase):
         self.assertEqual(test_result.x, 12)
         self.assertEqual(test_result.y, 67)
         self.assertEqual(test_result.rotation, 187)
+        self.assertEqual(test_result.quality, 10)
 
     def test_scan_model_return_instance(self):
         test_result = self.session.query(Scan).first()
@@ -32,6 +33,7 @@ class TestScanModel(unittest.TestCase):
         self.assertIsInstance(test_result.y, types.IntType)
         self.assertIsInstance(test_result.rotation, types.IntType)
         self.assertIsInstance(test_result.timestamp, datetime.datetime)
+        self.assertIsInstance(test_result.quality, types.IntType)
 
 
 class TestScanResultModel(unittest.TestCase):
@@ -42,8 +44,8 @@ class TestScanResultModel(unittest.TestCase):
 
         Base.metadata.create_all(engine)
 
-        test_scan = Scan(x=12, y=67, rotation=187)
-        test_scan.scan_results = [ScanResult(angle=0, distance=1234, scans=10)]
+        test_scan = Scan(x=12, y=67, rotation=187, quality=10)
+        test_scan.scan_results = [ScanResult(angle=0, distance=1234)]
         self.session.add(test_scan)
         self.session.flush()
 
@@ -51,13 +53,11 @@ class TestScanResultModel(unittest.TestCase):
         test_result = self.session.query(ScanResult).first()
         self.assertEqual(test_result.angle, 0)
         self.assertEqual(test_result.distance, 1234)
-        self.assertEqual(test_result.scans, 10)
 
     def test_scan_model_return_instance(self):
         test_result = self.session.query(ScanResult).first()
         self.assertIsInstance(test_result.angle, types.IntType)
         self.assertIsInstance(test_result.distance, types.IntType)
-        self.assertIsInstance(test_result.scans, types.IntType)
 
 
 if __name__ == '__main__':
