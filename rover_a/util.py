@@ -11,16 +11,16 @@ class bresenham:
         self.start = list(start)
         self.end = list(end)
         self.path = []
+        self.reverse = False
 
         self.steep = numpy.abs(self.end[1] - self.start[1]) > numpy.abs(self.end[0] - self.start[0])
 
         if self.steep:
-            print 'Steep'
             self.start = self.swap(self.start[0], self.start[1])
             self.end = self.swap(self.end[0], self.end[1])
 
         if self.start[0] > self.end[0]:
-            print 'flippin and floppin'
+            self.reverse = True
             _x0 = int(self.start[0])
             _x1 = int(self.end[0])
             self.start[0] = _x1
@@ -56,11 +56,8 @@ class bresenham:
                 y += ystep
                 error -= 1.0
 
-        print start
-        print end
-        print
-        print self.start
-        print self.end
+        if self.reverse:
+            self.path.reverse()
 
     def swap(self, n1, n2):
         return [n2, n1]

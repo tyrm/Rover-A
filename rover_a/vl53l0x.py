@@ -113,8 +113,7 @@ VL53L0X_DEVICEMODE_SINGLE_ALS = 10
 VL53L0X_DEVICEMODE_GPIO_DRIVE = 20
 VL53L0X_DEVICEMODE_GPIO_OSC = 21
 
-logging.getLogger(__name__)
-
+log = logging.getLogger(__name__)
 
 class VL53L0X:
     def __init__(self, address, i2c=None):
@@ -131,7 +130,7 @@ class VL53L0X:
         self.device_mode = VL53L0X_DEVICEMODE_SINGLE_RANGING
         self.limit_checks_value = [0, 0, 0, 0, 0, 0]
 
-        logging.info("VL53L0X RevisionID[{0}] DeviceID[{1}]".format(hex(rev_id), hex(dev_id)))
+        log.info("VL53L0X RevisionID[{0}] DeviceID[{1}]".format(hex(rev_id), hex(dev_id)))
 
     def calc_macro_period_ps(self, vcsel_period_pclks):
         pll_period_ps = 1655
