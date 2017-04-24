@@ -1,6 +1,7 @@
-Adafruit-GPIO
-Adafruit_MotorHAT
-Adafruit-PCA9685
 numpy
 psycopg2
 sqlalchemy
+
+git+https://github.com/adafruit/Adafruit_Python_GPIO.git
+git+https://github.com/adafruit/Adafruit-Motor-HAT-Python-Library.git
+git+https://github.com/adafruit/Adafruit_Python_PCA9685.git
