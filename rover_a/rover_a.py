@@ -10,8 +10,9 @@ import time
 import Adafruit_PCA9685
 import atexit
 from flask import Flask
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, case
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.sql import func
 
 from models import Base, Map, MapCell, Scan, ScanResult
 from scanner import Scanner
@@ -55,7 +56,7 @@ class RoverA:
         engine = create_engine(connection_string, echo=False)
 
         Base.metadata.create_all(engine)
-        self.db_session = sessionmaker(bind=engine)()
+        self.DBSession = sessionmaker(bind=engine)
 
         self.pwm = Adafruit_PCA9685.PCA9685(I2C_ADDR_PWM_CONTROLLER)
         self.pwm.set_pwm_freq(60)
@@ -78,14 +79,17 @@ class RoverA:
         except ConfigParser.NoSectionError:
             default_map_name = 'default'
 
-        default_map = self.db_session.query(Map).filter(Map.name == default_map_name).one_or_none()
+        session = self.DBSession()
+
+        default_map = session.query(Map).filter(Map.name == default_map_name).one_or_none()
         if default_map is not None:
             self.map = default_map
         else:
             log.info('Creating new map [{0}]'.format(default_map_name))
+
             new_map = Map(name=default_map_name, scale=50)
-            self.db_session.add(new_map)
-            self.db_session.commit()
+            session.add(new_map)
+            session.commit()
             self.map = new_map
 
         log.info('Using map {0}'.format(self.map))
@@ -95,14 +99,24 @@ class RoverA:
         self.api_thread.start()
 
     def run(self):
-        # val = self.do_scan()
+        session = self.DBSession()
+        val = self.do_scan()
 
-        # self.db_session.add(val)
-        # self.db_session.commit()
+        session.add(val)
+        session.commit()
 
-        # self.update_map(val)
+        hits, misses = self.make_map_cells(val)
 
-        self.api_map()
+        log.info("Updating Hits")
+        session.bulk_save_objects(hits)
+        session.commit()
+        log.info(hits[0])
+
+        log.info("Updating Misses")
+        session.bulk_save_objects(misses)
+        session.commit()
+        log.info(misses[0])
+        log.info("Done")
 
         exit()
 
@@ -121,7 +135,7 @@ class RoverA:
 
         return new_scan
 
-    def update_map(self, scan):
+    def make_map_cells(self, scan):
         hits = []
         misses = []
 
@@ -144,72 +158,74 @@ class RoverA:
 
         log.info("Found Misses: {0} ({1}) Hits: {2}".format(len(misses), misses_dup_len, len(hits)))
 
-        log.info("Updating Hits")
+        hit_cells = []
         for hit in hits:
             hit_cell = MapCell(map=self.map, x=hit[0], y=hit[1], hit=True, scan=scan)
-            self.db_session.add(hit_cell)
+            hit_cells.append(hit_cell)
 
-        log.info("Committing Hits")
-        self.db_session.commit()
-        log.info("Updating Misses")
-        for index, miss in enumerate(misses):
+        miss_cells = []
+        for miss in misses:
             miss_cell = MapCell(map=self.map, x=miss[0], y=miss[1], hit=False, scan=scan)
-            self.db_session.add(miss_cell)
-            if index % 200 == 0 and index != 0:
-                log.info("Committing Misses Offset {0}".format(index))
-                self.db_session.commit()
+            miss_cells.append(miss_cell)
 
-        log.info("Committing Final Misses")
-        self.db_session.commit()
-        log.info("Map update complete")
+        return hit_cells, miss_cells
+
+    def get_map_dimensions(self):
+        session = self.DBSession()
+
+        max_x = session.query(MapCell.x.label('x')).order_by(MapCell.x.desc()).first().x
+        min_x = session.query(MapCell.x.label('x')).order_by(MapCell.x.asc()).first().x
+        max_y = session.query(MapCell.y.label('y')).order_by(MapCell.y.desc()).first().y
+        min_y = session.query(MapCell.y.label('y')).order_by(MapCell.y.asc()).first().y
+
+        return (min_x, min_y), (max_x, max_y)
+
+    def get_map(self):
+        map_min, map_max = self.get_map_dimensions()
+
+        session = self.DBSession()
+        map_query = session.query(MapCell.x.label('x'),
+                                  MapCell.y.label('y'),
+                                  (func.sum(case({'TRUE': 1.0},
+                                                 value=MapCell.hit,
+                                                 else_=0.0)) / func.count(MapCell.hit)).label('p')). \
+            group_by(MapCell.x, MapCell.y)
+
+        w = map_max[0] - map_min[0]
+        h = map_max[1] - map_min[1]
+
+        map_grid = [[None for _ in range(h + 1)] for _ in range(w + 1)]
+
+        for cell in map_query.all():
+            map_grid[cell.x - map_min[0]][cell.y - map_min[1]] = cell.p
+
+        return map_grid
+
+    def make_text_map(self, map_grid):
+
+        w = len(map_grid)
+        h = len(map_grid[0])
+
+        line = ''
+        for y in range(h):
+            for x in range(w):
+                cell = map_grid[x][h - y - 1]
+                if cell is None:
+                    line += ' '
+                elif cell == 1:
+                    line += '*'
+                else:
+                    line += str(int(cell * 10))
+            line += '\n'
+
+        return line
 
     def run_api(self):
         app = Flask(__name__)
 
         @app.route("/map")
         def hello():
-            return "Hello World!"
+            map_grid = self.get_map()
+            return self.make_text_map(map_grid)
 
         app.run(host='0.0.0.0')
-
-    def api_map(self):
-
-        max_x = self.db_session.query(MapCell).order_by(MapCell.x.desc()).limit(1).first().x
-        min_x = self.db_session.query(MapCell).order_by(MapCell.x.asc()).limit(1).first().x
-        max_y = self.db_session.query(MapCell).order_by(MapCell.y.desc()).limit(1).first().y
-        min_y = self.db_session.query(MapCell).order_by(MapCell.y.asc()).limit(1).first().y
-
-        w = max_x - min_x
-        h = max_y - min_y
-
-        log.info('Map size ({4}, {5}) [{0}, {1}] x [{2}, {3}]'.format(min_x, min_y, max_x, max_y, w, h))
-
-        map = [[None for _ in range(h+1)] for _ in range(w+1)]
-
-        for y in range(min_y, max_y+1):
-            for x in range(min_x, max_x+1):
-                cells = self.db_session.query(MapCell).filter_by(x=x, y=y).order_by(MapCell.id.desc()).limit(10).all()
-
-                if len(cells) > 0:
-                    hit_ints = []
-
-                    for cell in cells:
-                        if cell.hit:
-                            hit_ints.append(1.0)
-                        else:
-                            hit_ints.append(0.0)
-
-                    map[x-min_x][y-min_y] = numpy.average(hit_ints)
-
-        for y in range(h+1):
-            line = ''
-            for x in range(w+1):
-                cell = map[x][h-y]
-                if cell is None:
-                    line += ' '
-                elif cell == 1:
-                    line += '*'
-                else:
-                    line += str(int(cell*10))
-            print(line)
-
